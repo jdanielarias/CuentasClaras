@@ -1,0 +1,13 @@
+# Al publicar se sube esta carpeta entera, y los scripts de `supabase/` llevan
+# tus precios de compra dentro. Esta regla hace que esas direcciones respondan
+# "no existe" aunque el archivo esté subido; `force = true` es lo que hace que
+# gane sobre el archivo real.
+#
+# Las copias de seguridad `.json` no se arreglan con una regla: simplemente no
+# deben guardarse en esta carpeta. Guárdalas fuera, en `CuentasClaras-copias`.
+
+[[redirects]]
+  from = "/supabase/*"
+  to = "/index.html"
+  status = 404
+  force = true

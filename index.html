@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<title>Cuentas Claras</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cuentas Claras">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ ENTRAR ============ -->
+<!-- Se ve antes que nada: sin sesión no se carga ningún dato. -->
+<div class="portada" id="pantallaEntrar" hidden>
+  <div class="portada-caja">
+    <span class="portada-ico">C</span>
+    <h1>Cuentas Claras</h1>
+    <p class="ayuda centro">Entra con tu correo y tu contraseña.</p>
+    <form id="formEntrar" autocomplete="on">
+      <label for="eCorreo">Correo</label>
+      <input type="email" id="eCorreo" required autocomplete="username" inputmode="email" placeholder="tucorreo@ejemplo.com">
+
+      <label for="eClave">Contraseña</label>
+      <input type="password" id="eClave" required autocomplete="current-password" placeholder="Tu contraseña">
+
+      <p class="ayuda" id="entrarAviso"></p>
+      <button class="btn ancho" id="btnEntrar" type="submit">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<div class="portada" id="cargando" hidden>
+  <div class="portada-caja">
+    <span class="portada-ico">C</span>
+    <p class="ayuda centro">Cargando tus datos…</p>
+  </div>
+</div>
+
+<p class="barra-sinred" id="barraSinRed" hidden></p>
+
+<header class="topbar">
+  <button class="selector-tienda" id="btnTienda" aria-label="Cambiar de tienda">
+    <span class="st-ico" id="iconoTienda">C</span>
+    <span class="st-txt">
+      <span class="st-nombre" id="nombreTienda">Cuentas Claras</span>
+      <span class="st-sub" id="tituloVista">Inventario</span>
+    </span>
+    <span class="st-caret"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+  </button>
+  <button class="icon-btn" id="btnMenu" aria-label="Opciones">
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7.5h8.5"/><path d="M17.5 7.5H20"/><circle cx="15" cy="7.5" r="2.3"/><path d="M4 16.5h2.5"/><path d="M11.5 16.5H20"/><circle cx="9" cy="16.5" r="2.3"/></svg>
+  </button>
+</header>
+
+<main id="main">
+
+  <!-- ============ INVENTARIO ============ -->
+  <section class="vista" id="vista-inventario">
+    <div class="totales">
+      <div class="total-item">
+        <span class="total-lbl">Invertido</span>
+        <strong class="total-val" id="totInvertido">$0</strong>
+        <span class="total-sub">precio de compra</span>
+      </div>
+      <div class="total-item">
+        <span class="total-lbl">Si vendo todo</span>
+        <strong class="total-val" id="totVenta">$0</strong>
+        <span class="total-sub">precio de venta</span>
+      </div>
+      <div class="total-item destacado">
+        <span class="total-lbl">Ganancia</span>
+        <strong class="total-val" id="totGanancia">$0</strong>
+        <span class="total-sub" id="totUnidades">0 unidades</span>
+      </div>
+    </div>
+    <p class="nota-filtro" id="notaFiltro"></p>
+    <p class="nota-sincosto" id="notaSinCosto"></p>
+
+    <div class="barra-busqueda">
+      <input type="search" id="buscar" placeholder="Buscar producto..." autocomplete="off">
+      <select id="orden" aria-label="Ordenar">
+        <option value="nombre">A - Z</option>
+        <option value="precioDesc">Precio: mayor a menor</option>
+        <option value="precioAsc">Precio: menor a mayor</option>
+        <option value="unidades">Menos unidades</option>
+        <option value="ganancia">Más ganancia</option>
+        <option value="reciente">Más reciente</option>
+      </select>
+    </div>
+
+    <div class="chips-cat" id="filtroCategorias"></div>
+
+    <div id="listaInventario" class="lista"></div>
+  </section>
+
+  <!-- ============ VENTAS ============ -->
+  <section class="vista oculto" id="vista-ventas">
+    <div class="periodo" data-periodo-de="ventas"></div>
+    <div class="totales">
+      <div class="total-item">
+        <span class="total-lbl">Vendido</span>
+        <strong class="total-val" id="vtaTotal">$0</strong>
+        <span class="total-sub" id="vtaUnidades">0 unidades</span>
+      </div>
+      <div class="total-item">
+        <span class="total-lbl">Costo</span>
+        <strong class="total-val" id="vtaCosto">$0</strong>
+        <span class="total-sub">lo que te costó</span>
+      </div>
+      <div class="total-item destacado">
+        <span class="total-lbl">Ganancia</span>
+        <strong class="total-val" id="vtaGanancia">$0</strong>
+        <span class="total-sub">de estas ventas</span>
+      </div>
+    </div>
+    <p class="nota-sincosto" id="notaVentasSinCosto"></p>
+    <div id="listaVentas" class="lista"></div>
+  </section>
+
+  <!-- ============ GASTOS ============ -->
+  <section class="vista oculto" id="vista-gastos">
+    <div class="periodo" data-periodo-de="gastos"></div>
+    <div class="totales">
+      <div class="total-item ancho rojo">
+        <span class="total-lbl">Total de gastos</span>
+        <strong class="total-val" id="gasTotal">$0</strong>
+        <span class="total-sub" id="gasCantidad">0 registros</span>
+      </div>
+    </div>
+    <div id="resumenCategorias" class="cat-resumen"></div>
+    <div id="listaGastos" class="lista"></div>
+  </section>
+
+  <!-- ============ RESUMEN ============ -->
+  <section class="vista oculto" id="vista-resumen">
+    <div class="periodo" data-periodo-de="resumen"></div>
+
+    <div class="tarjeta">
+      <h2>Cómo te fue</h2>
+      <table class="tabla-resumen">
+        <tr><td>Ventas</td><td id="rsVentas">$0</td></tr>
+        <tr><td>Costo de lo vendido</td><td id="rsCosto" class="neg">$0</td></tr>
+        <tr class="sub"><td>Ganancia de las ventas</td><td id="rsBruta">$0</td></tr>
+        <tr><td>Gastos</td><td id="rsGastos" class="neg">$0</td></tr>
+        <tr class="final"><td>Te quedaron</td><td id="rsNeta">$0</td></tr>
+      </table>
+      <p class="nota-sincosto" id="notaResumenSinCosto"></p>
+    </div>
+
+    <div class="tarjeta">
+      <h2>Lo que más vendiste</h2>
+      <div id="topProductos" class="mini-lista"></div>
+    </div>
+
+    <div class="tarjeta">
+      <h2>Tu inventario hoy</h2>
+      <table class="tabla-resumen">
+        <tr><td>Productos distintos</td><td id="rsProductos">0</td></tr>
+        <tr><td>Unidades en total</td><td id="rsUnidades">0</td></tr>
+        <tr><td>Invertido en mercancía</td><td id="rsInvertido">$0</td></tr>
+        <tr class="sub"><td>Ganancia si vendes todo</td><td id="rsPotencial">$0</td></tr>
+      </table>
+    </div>
+
+    <div class="tarjeta">
+      <h2>Copia de seguridad</h2>
+      <p class="ayuda">Tus datos viven en la nube y puedes abrirlos desde cualquier celular. Aun así, guarda una copia de vez en cuando: es tuya y no depende de nadie.</p>
+      <p class="ayuda" id="estadoCopia"></p>
+      <div class="fila-btns">
+        <button class="btn secundario" id="btnExportar">Guardar copia</button>
+        <button class="btn secundario" id="btnImportar">Restaurar copia</button>
+      </div>
+      <input type="file" id="archivoImportar" accept=".json,application/json" hidden>
+    </div>
+  </section>
+
+</main>
+
+<button class="fab" id="fab" aria-label="Añadir">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M12 5.5v13"/><path d="M5.5 12h13"/></svg>
+</button>
+
+<nav class="tabs">
+  <button class="tab activa" data-vista="inventario">
+    <span class="tab-ico"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.2 12 3.6l9 4.6v7.6L12 20.4l-9-4.6z"/><path d="M3 8.2 12 12.8l9-4.6"/><path d="M12 12.8v7.6"/></svg></span>
+    Inventario
+  </button>
+  <button class="tab" data-vista="ventas">
+    <span class="tab-ico"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.2h12v17.6l-3-1.7-3 1.7-3-1.7-3 1.7z"/><path d="M9.4 8.4h5.2"/><path d="M9.4 12.4h5.2"/></svg></span>
+    Ventas
+  </button>
+  <button class="tab" data-vista="gastos">
+    <span class="tab-ico"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.6A2.6 2.6 0 0 1 5.6 5H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5.6A2.6 2.6 0 0 1 3 16.4z"/><path d="M3 7.6h15"/><circle cx="16.4" cy="12" r="1.25"/></svg></span>
+    Gastos
+  </button>
+  <button class="tab" data-vista="resumen">
+    <span class="tab-ico"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.4 20.2h17.2"/><path d="M6.6 20.2V11"/><path d="M12 20.2V4.4"/><path d="M17.4 20.2v-6.4"/></svg></span>
+    Resumen
+  </button>
+</nav>
+
+<!-- ============ MODAL: PRODUCTO ============ -->
+<div class="fondo-modal oculto" id="modalProducto">
+  <div class="modal">
+    <div class="modal-cab">
+      <h2 id="tituloProducto">Nuevo producto</h2>
+      <button class="icon-btn" data-cerrar aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button>
+    </div>
+    <form id="formProducto" class="modal-cuerpo">
+      <input type="hidden" id="pId">
+
+      <label for="pNombre">Nombre del producto</label>
+      <input type="text" id="pNombre" required placeholder="Ej: Labial Gege Bear" autocomplete="off">
+
+      <div class="dos-columnas">
+        <div>
+          <label for="pCompra">Precio de compra</label>
+          <input type="text" inputmode="numeric" id="pCompra" placeholder="No lo sé">
+          <span class="ayuda">Opcional: déjalo vacío</span>
+        </div>
+        <div>
+          <label for="pVenta">Precio de venta</label>
+          <input type="text" inputmode="numeric" id="pVenta" placeholder="0" required>
+          <span class="ayuda">Lo que cobras</span>
+        </div>
+      </div>
+
+      <div class="aviso-ganancia" id="avisoGanancia">Ganas <strong>$0</strong> por unidad</div>
+
+      <!-- Un producto sin tonos lleva unas unidades y ya. Si viene en varios
+           tonos, cada tono lleva las suyas y esta casilla desaparece. -->
+      <div class="dos-columnas" id="filaUnidades">
+        <div>
+          <label for="pUnidades">Unidades</label>
+          <input type="number" id="pUnidades" min="0" step="1" value="1" inputmode="numeric">
+        </div>
+        <div>
+          <label for="pMinimo">Avisar cuando queden</label>
+          <input type="number" id="pMinimo" min="0" step="1" value="1" inputmode="numeric">
+        </div>
+      </div>
+
+      <div id="bloqueMinimo" hidden>
+        <label for="pMinimo2">Avisar cuando queden</label>
+        <input type="number" id="pMinimo2" min="0" step="1" value="1" inputmode="numeric">
+      </div>
+
+      <label class="palanca" id="palancaTonos">
+        <input type="checkbox" id="pTieneTonos">
+        <span class="palanca-pista" aria-hidden="true"></span>
+        <span class="palanca-txt">Viene en varios tonos</span>
+      </label>
+      <span class="ayuda">Para labiales, bases, esmaltes... Cada tono lleva sus propias unidades y se descuenta por separado al venderlo. Toca el cuadrito de la cámara para ponerle a cada tono su foto: es la que verá la clienta al elegirlo.</span>
+
+      <div id="bloqueTonos" hidden>
+        <div class="tonos-lista" id="listaTonos"></div>
+        <button type="button" class="btn secundario ancho" id="btnAnadirTono">Añadir tono</button>
+        <input type="file" id="archivoFotoTono" accept="image/*" hidden>
+        <p class="ayuda" id="resumenTonos"></p>
+      </div>
+
+      <label for="pTienda">Tienda</label>
+      <select id="pTienda"></select>
+      <span class="ayuda">Cámbiala para mover el producto a otra tienda</span>
+
+      <label for="pCategoria">Categoría (opcional)</label>
+      <input type="text" id="pCategoria" list="categoriasProducto" placeholder="Ej: Aretes" autocomplete="off">
+      <datalist id="categoriasProducto"></datalist>
+      <span class="ayuda">Sirve para filtrar después: aretes, collares, labiales...</span>
+
+      <datalist id="tonosProducto"></datalist>
+
+      <label for="pNotas">Nota privada (opcional)</label>
+      <textarea id="pNotas" rows="2" placeholder="Proveedor, color, presentación..."></textarea>
+      <span class="ayuda">Solo la ves tú. Nunca sale en el catálogo.</span>
+
+      <div class="aparte">
+        <span class="aparte-tit">Catálogo público</span>
+
+        <label class="palanca">
+          <input type="checkbox" id="pPublicado">
+          <span class="palanca-pista" aria-hidden="true"></span>
+          <span class="palanca-txt">Mostrar este producto</span>
+        </label>
+        <span class="ayuda" id="pPublicadoAyuda"></span>
+
+        <label for="pDescripcion">Descripción para el cliente (opcional)</label>
+        <textarea id="pDescripcion" rows="2" placeholder="Material, medidas, cómo se usa..."></textarea>
+
+        <label>Fotos</label>
+        <div class="tira-fotos" id="pFotos"></div>
+        <button type="button" class="btn secundario ancho" id="btnAnadirFoto">Añadir foto</button>
+        <input type="file" id="archivoFoto" accept="image/*" hidden>
+        <span class="ayuda">La primera foto es la que se ve en la lista. Sin fotos se muestra la inicial del producto.</span>
+      </div>
+
+      <div class="fila-btns">
+        <button type="button" class="btn peligro" id="btnBorrarProducto" hidden>Borrar</button>
+        <button type="submit" class="btn">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: VENDER ============ -->
+<div class="fondo-modal oculto" id="modalVenta">
+  <div class="modal">
+    <div class="modal-cab">
+      <h2>Registrar venta</h2>
+      <button class="icon-btn" data-cerrar aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button>
+    </div>
+    <form id="formVenta" class="modal-cuerpo">
+      <input type="hidden" id="vProductoId">
+      <p class="producto-vendido" id="vNombre"></p>
+
+      <div class="dos-columnas">
+        <div>
+          <label for="vCantidad">Cantidad</label>
+          <div class="stepper">
+            <button type="button" class="paso" data-paso="-1">&minus;</button>
+            <input type="number" id="vCantidad" min="1" step="1" value="1" inputmode="numeric">
+            <button type="button" class="paso" data-paso="1">+</button>
+          </div>
+          <span class="ayuda" id="vDisponible"></span>
+        </div>
+        <div>
+          <label for="vPrecio">Precio de venta c/u</label>
+          <input type="text" inputmode="numeric" id="vPrecio" required>
+          <span class="ayuda">Cámbialo si diste rebaja</span>
+        </div>
+      </div>
+
+      <div class="resumen-venta">
+        <div><span>Total de la venta</span><strong id="vTotal">$0</strong></div>
+        <div class="ganancia"><span>Tu ganancia</span><strong id="vGanancia">$0</strong></div>
+      </div>
+
+      <div class="fila-btns">
+        <button type="submit" class="btn">Confirmar venta</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: GASTO ============ -->
+<div class="fondo-modal oculto" id="modalGasto">
+  <div class="modal">
+    <div class="modal-cab">
+      <h2 id="tituloGasto">Nuevo gasto</h2>
+      <button class="icon-btn" data-cerrar aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button>
+    </div>
+    <form id="formGasto" class="modal-cuerpo">
+      <input type="hidden" id="gId">
+
+      <label for="gMonto">Valor del gasto</label>
+      <input type="text" inputmode="numeric" id="gMonto" placeholder="0" required>
+
+      <label for="gCategoria">Categoría</label>
+      <select id="gCategoria">
+        <option>Mercancía</option>
+        <option>Transporte / envíos</option>
+        <option>Servicios (luz, agua, internet)</option>
+        <option>Arriendo</option>
+        <option>Publicidad</option>
+        <option>Empaques y bolsas</option>
+        <option>Personal</option>
+        <option>Otro</option>
+      </select>
+
+      <label for="gDescripcion">Descripción (opcional)</label>
+      <input type="text" id="gDescripcion" placeholder="Ej: Domicilio pedido Bogotá" autocomplete="off">
+
+      <div class="dos-columnas">
+        <div>
+          <label for="gFecha">Fecha</label>
+          <input type="date" id="gFecha" required>
+        </div>
+        <div>
+          <label for="gProveedor">Proveedor (opcional)</label>
+          <input type="text" id="gProveedor" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="fila-btns">
+        <button type="button" class="btn peligro" id="btnBorrarGasto" hidden>Borrar</button>
+        <button type="submit" class="btn">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MODAL: TIENDAS ============ -->
+<div class="fondo-modal oculto" id="modalTiendas">
+  <div class="modal">
+    <div class="modal-cab">
+      <h2>Mis tiendas</h2>
+      <button class="icon-btn" data-cerrar aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button>
+    </div>
+    <div class="modal-cuerpo">
+      <div id="listaTiendas" class="lista-tiendas"></div>
+      <button class="btn secundario ancho" id="btnAnadirTienda">Añadir otra tienda</button>
+      <p class="ayuda centro">Cada tienda tiene su propio inventario, sus ventas y sus gastos.<br>Son independientes entre sí.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: EDITAR TIENDA ============ -->
+<div class="fondo-modal oculto" id="modalEditarTienda">
+  <div class="modal">
+    <div class="modal-cab">
+      <h2 id="tituloEditarTienda">Editar tienda</h2>
+      <button class="icon-btn" data-cerrar aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button>
+    </div>
+    <form id="formTienda" class="modal-cuerpo">
+      <input type="hidden" id="tId">
+
+      <div class="previa-tienda" id="previaTienda">
+        <span class="previa-ico" id="previaIco"></span>
+        <span class="previa-nombre" id="previaNombre">Mi tienda</span>
+      </div>
+
+      <label for="tNombre">Nombre de la tienda</label>
+      <input type="text" id="tNombre" required autocomplete="off" placeholder="Ej: Venusstore">
+
+      <label>Color de la tienda</label>
+      <div class="rejilla-colores" id="rejillaColores"></div>
+      <span class="ayuda">El monograma sale de la inicial del nombre.</span>
+
+      <div class="aparte">
+        <span class="aparte-tit">Catálogo público</span>
+        <label class="palanca">
+          <input type="checkbox" id="tPublicada">
+          <span class="palanca-pista" aria-hidden="true"></span>
+          <span class="palanca-txt">Vender esta tienda en el catálogo</span>
+        </label>
+        <span class="ayuda">Si la apagas, todos sus productos desaparecen del catálogo de golpe, aunque estén marcados uno a uno.</span>
+      </div>
+
+      <div class="fila-btns">
+        <button type="submit" class="btn">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ MENÚ ============ -->
+<div class="fondo-modal oculto" id="modalMenu">
+  <div class="modal">
+    <div class="modal-cab">
+      <h2>Opciones</h2>
+      <button class="icon-btn" data-cerrar aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button>
+    </div>
+    <div class="modal-cuerpo">
+      <button class="btn secundario ancho" id="btnTiendaPublica">Tienda pública</button>
+      <button class="btn secundario ancho" id="btnExportar2">Guardar copia de seguridad</button>
+      <button class="btn secundario ancho" id="btnImportar2">Restaurar copia</button>
+      <button class="btn secundario ancho" id="btnSalir">Cerrar sesión</button>
+      <button class="btn peligro ancho" id="btnBorrarTodo">Borrar todos los datos</button>
+      <p class="ayuda centro">Cuentas Claras &middot; v2.0<br>Tus datos viven en la nube, con tu cuenta.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TIENDA PÚBLICA ============ -->
+<div class="fondo-modal oculto" id="modalPublica">
+  <div class="modal">
+    <div class="modal-cab">
+      <h2>Tienda pública</h2>
+      <button class="icon-btn" data-cerrar aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button>
+    </div>
+    <form id="formPublica" class="modal-cuerpo">
+      <label for="cNombre">Nombre del catálogo</label>
+      <input type="text" id="cNombre" placeholder="Ej: Lizzmar &amp; Venus" autocomplete="off">
+      <span class="ayuda">Es el título grande que ve el cliente al entrar.</span>
+
+      <label for="cWhatsapp">WhatsApp para los pedidos</label>
+      <input type="tel" id="cWhatsapp" inputmode="tel" placeholder="300 123 4567" autocomplete="off">
+      <span class="ayuda">El número al que llegan los pedidos. Si es colombiano de 10 dígitos, el 57 se añade solo.</span>
+
+      <label for="cSaludo">Cómo empieza el mensaje</label>
+      <input type="text" id="cSaludo" placeholder="Hola, quiero pedir:" autocomplete="off">
+
+      <label>Color del catálogo</label>
+      <div class="rejilla-colores" id="coloresCatalogo"></div>
+
+      <div class="fila-btns">
+        <button type="submit" class="btn">Guardar</button>
+      </div>
+
+      <a class="btn secundario ancho centrado" id="verCatalogo" href="catalogo.html" target="_blank" rel="noopener">Ver el catálogo</a>
+      <p class="ayuda centro" id="estadoPublica"></p>
+    </form>
+  </div>
+</div>
+
+<div class="aviso" id="aviso"></div>
+
+<script src="vendor/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="datos.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

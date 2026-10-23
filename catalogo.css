@@ -1,0 +1,384 @@
+/* ============================================================
+   Catálogo público — hoja de estilos
+
+   Sigue la misma idea que el panel, llevada a un catálogo impreso:
+   Fraunces en grande, filetes de un píxel en vez de sombras, cifras
+   tabulares, productos numerados. Nada de degradados ni tarjetas
+   flotantes: el fondo es papel y lo que ordena la página son reglas.
+
+   La paleta y los tipos vienen de tokens.css.
+   ============================================================ */
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+
+body{
+  font-family:var(--sans);
+  background:var(--papel);
+  color:var(--tinta);
+  font-size:16px;
+  line-height:1.45;
+  letter-spacing:-0.005em;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:calc(84px + env(safe-area-inset-bottom));
+}
+
+.oculto{display:none !important}
+[hidden]{display:none !important}
+svg{display:block;flex:0 0 auto}
+
+.cifra{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:'tnum' 1,'lnum' 1}
+
+/* Etiquetas pequeñas en versalita espaciada: el recurso que ordena
+   toda la página sin necesidad de cajas ni colores. */
+.rotulo{
+  display:block;
+  font-size:10px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.2em;color:var(--tinta-suave);
+}
+
+/* ================= portada ================= */
+
+.cab{
+  padding:clamp(34px,9vw,64px) var(--margen) clamp(22px,5vw,32px);
+  border-bottom:1px solid var(--tinta);
+}
+:root{--margen:20px}
+@media (min-width:640px){:root{--margen:40px}}
+
+.cab h1{
+  font-family:var(--serif);
+  font-size:clamp(38px,12vw,72px);
+  font-weight:600;
+  line-height:.95;
+  letter-spacing:-0.035em;
+  margin:10px 0 0;
+  text-wrap:balance;
+}
+/* El lockup de las dos marcas. Manda él: por eso el título de texto solo
+   aparece si la imagen no carga. */
+.cab h1{margin:0}
+.cab-logo{
+  display:block;width:100%;height:auto;
+  max-width:440px;margin:6px 0 0;margin-left:-2%;
+}
+
+.cab-sub{
+  margin:14px 0 0;max-width:34em;
+  font-size:14px;color:var(--tinta-media);line-height:1.5;
+}
+
+/* ================= filtros ================= */
+
+/* Buscador y categorías se quedan arriba al bajar por el catálogo. */
+.barra-fija{position:sticky;top:0;z-index:20;background:var(--papel)}
+
+/* El buscador es una línea para escribir, no una caja: la lupa, el texto
+   y un filete debajo, como un renglón de formulario impreso. */
+.buscador{
+  display:flex;align-items:center;gap:10px;
+  padding:13px var(--margen) 11px;
+  border-bottom:1px solid var(--linea);
+  color:var(--tinta-suave);
+}
+.buscador:focus-within{color:var(--marca)}
+.buscador input{
+  flex:1;min-width:0;border:0;background:none;outline:0;
+  font:inherit;font-size:16px; /* 16px: el iPhone no hace zoom al tocarlo */
+  color:var(--tinta);padding:3px 0;
+  -webkit-appearance:none;appearance:none;border-radius:0;
+}
+.buscador input::placeholder{color:var(--tinta-suave)}
+.buscador input::-webkit-search-cancel-button,
+.buscador input::-webkit-search-decoration{-webkit-appearance:none;display:none}
+.limpiar{
+  flex:0 0 auto;background:none;border:0;cursor:pointer;
+  color:var(--tinta-suave);padding:4px;margin:-4px -4px -4px 0;
+}
+
+/* Texto subrayado, no pastillas: se lee como un índice. */
+.filtros{
+  display:flex;gap:22px;overflow-x:auto;scrollbar-width:none;
+  padding:0 var(--margen);
+  border-bottom:1px solid var(--linea);
+  background:var(--papel);
+}
+.filtros::-webkit-scrollbar{display:none}
+.filtros button{
+  flex:0 0 auto;background:none;border:0;cursor:pointer;
+  font-family:inherit;font-size:13px;font-weight:700;
+  color:var(--tinta-suave);
+  padding:15px 0;
+  border-bottom:2px solid transparent;
+  margin-bottom:-1px;
+  letter-spacing:.01em;
+}
+.filtros button.activo{color:var(--marca);border-bottom-color:var(--marca)}
+
+/* ================= rejilla de productos ================= */
+
+/* Las reglas de un píxel dibujan la retícula: los huecos entre
+   columnas son líneas, no aire vacío. */
+.rejilla{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:0;
+  border-top:1px solid var(--linea);
+  margin-top:-1px;
+}
+@media (min-width:760px){.rejilla{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:1080px){.rejilla{grid-template-columns:repeat(4,1fr)}}
+
+.pieza{
+  border-bottom:1px solid var(--linea);
+  border-right:1px solid var(--linea);
+  padding:16px var(--margen) 20px;
+  background:none;border-top:0;border-left:0;
+  font:inherit;color:inherit;text-align:left;cursor:pointer;
+  display:flex;flex-direction:column;
+  -webkit-appearance:none;appearance:none;
+}
+.rejilla .pieza:nth-child(2n){border-right:0}
+@media (min-width:760px){
+  .pieza{padding-left:18px;padding-right:18px}
+  .rejilla .pieza:nth-child(2n){border-right:1px solid var(--linea)}
+  .rejilla .pieza:nth-child(3n){border-right:0}
+}
+@media (min-width:1080px){
+  .rejilla .pieza:nth-child(3n){border-right:1px solid var(--linea)}
+  .rejilla .pieza:nth-child(4n){border-right:0}
+}
+
+.pieza-num{
+  font-size:10px;font-weight:800;letter-spacing:.16em;
+  color:var(--tinta-suave);margin-bottom:10px;
+}
+
+/* La foto, o su ausencia. Sin foto no hay hueco roto: hay una lámina
+   con el monograma del producto, igual que las tiendas del panel. */
+.lamina{
+  position:relative;
+  aspect-ratio:4/5;width:100%;
+  background:var(--marca-tenue);
+  border:1px solid var(--linea);
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.lamina img{width:100%;height:100%;object-fit:cover;display:block}
+.lamina-mono{
+  font-family:var(--serif);font-weight:600;
+  font-size:clamp(34px,11vw,54px);line-height:1;
+  color:var(--marca);opacity:.32;
+  padding-bottom:4px;
+}
+.agotada .lamina img{filter:grayscale(1);opacity:.45}
+.agotada .lamina{background:var(--linea)}
+
+.pieza-nom{
+  font-family:var(--serif);
+  font-size:17px;font-weight:600;line-height:1.2;
+  letter-spacing:-0.015em;
+  margin:13px 0 0;
+  text-wrap:balance;
+}
+.pieza-precio{margin-top:5px;font-size:14.5px;font-weight:700}
+
+/* Avisos de existencias: texto en versalita, sin globos de color. */
+.pieza-aviso{margin-top:7px;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.pieza-aviso.pocas{color:var(--ambar)}
+.pieza-aviso.agotado{color:var(--tinta-suave)}
+.pieza-aviso.tonos{color:var(--tinta-suave)}
+
+.vacio{
+  grid-column:1/-1;padding:60px var(--margen);text-align:center;
+  color:var(--tinta-suave);font-size:14px;
+}
+.vacio p{margin:0 auto;max-width:28em}
+.vacio p:first-child{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--tinta);letter-spacing:-0.015em}
+.vacio .vacio-sub{margin-top:10px;font-size:13.5px;line-height:1.5}
+.vacio .btn-fino{max-width:280px;margin:18px auto 0}
+
+/* ================= pie ================= */
+
+.pie{
+  padding:40px var(--margen) 30px;
+  border-top:1px solid var(--tinta);
+  margin-top:-1px;
+}
+.pie p{margin:10px 0 0;font-size:13px;color:var(--tinta-media)}
+.pie-marca{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:-0.02em;margin:0}
+
+/* ================= barra del pedido ================= */
+
+/* El color de la tienda se reserva para lo que el cliente toca: el
+   pedido, el botón de enviar, la categoría activa y el tono elegido.
+   Los textos y las fotos siguen en negro sobre papel, así que la página
+   no se convierte en un muestrario de colores. */
+
+.barra-pedido{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  width:100%;border:0;cursor:pointer;font:inherit;text-align:left;
+  background:var(--marca);color:var(--papel);
+  padding:16px var(--margen) calc(16px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.barra-pedido b{font-size:15px;font-weight:700}
+.barra-pedido .rotulo{color:rgba(246,243,239,.62);margin-bottom:3px}
+.barra-pedido span.ver{font-size:13px;font-weight:700;border-bottom:1.5px solid rgba(246,243,239,.5);padding-bottom:1px}
+
+/* ================= hojas (producto y pedido) ================= */
+
+.hoja{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(28,24,21,.45);
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.hoja-caja{
+  width:100%;max-width:560px;max-height:92vh;overflow-y:auto;
+  background:var(--papel);
+  border-top:1px solid var(--tinta);
+  padding:0 var(--margen) calc(24px + env(safe-area-inset-bottom));
+}
+@media (min-width:640px){
+  .hoja{align-items:center;padding:24px}
+  .hoja-caja{border:1px solid var(--tinta);max-height:88vh}
+}
+.hoja-cab{
+  position:sticky;top:0;background:var(--papel);z-index:2;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:18px 0 14px;border-bottom:1px solid var(--linea);
+}
+.hoja-cab h2{font-family:var(--serif);font-size:20px;font-weight:600;letter-spacing:-0.02em;margin:0}
+.cerrar{
+  background:none;border:0;cursor:pointer;color:var(--tinta);
+  padding:4px;margin:-4px -4px -4px 0;
+}
+
+/* --- ficha del producto --- */
+.ficha-lamina{aspect-ratio:4/5;max-height:46vh;margin:20px auto 0;max-width:320px}
+
+/* Las demás fotos, en fila bajo la grande. Cuadradas y con filete, como
+   las contactos de una hoja de pruebas. */
+.tiras{
+  display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
+  margin:10px auto 0;max-width:320px;padding-bottom:2px;
+}
+.tiras::-webkit-scrollbar{display:none}
+.tira{
+  flex:0 0 auto;width:56px;height:56px;padding:0;cursor:pointer;
+  border:1px solid var(--linea-fuerte);background:var(--marca-tenue);
+  opacity:.55;transition:opacity .12s,border-color .12s;
+}
+.tira img{width:100%;height:100%;object-fit:cover;display:block}
+.tira.activa{opacity:1;border-color:var(--tinta)}
+.ficha-nom{
+  font-family:var(--serif);font-size:27px;font-weight:600;
+  line-height:1.12;letter-spacing:-0.025em;margin:22px 0 0;
+}
+.ficha-precio{margin-top:8px;font-size:20px;font-weight:700}
+.ficha-desc{margin:14px 0 0;font-size:14.5px;color:var(--tinta-media);line-height:1.55}
+.ficha-cat{margin-top:16px}
+
+/* Los tonos: rectángulos con filete, como las casillas de una ficha.
+   El elegido se invierte; el agotado se tacha y no se puede pulsar. */
+.tonos{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.tono-op{
+  padding:9px 13px;cursor:pointer;font:inherit;
+  font-size:13.5px;font-weight:700;letter-spacing:.01em;
+  background:none;color:var(--tinta);
+  border:1px solid var(--linea-fuerte);
+  display:flex;align-items:baseline;gap:6px;
+}
+.tono-op.activo{background:var(--marca);border-color:var(--marca);color:var(--papel)}
+/* Si el tono tiene foto, su botón la lleva en miniatura, redonda como
+   una muestra de color. */
+.tono-op{align-items:center}
+.tono-mini{
+  width:22px;height:22px;border-radius:50%;object-fit:cover;flex:0 0 auto;
+  margin:-3px 0 -3px -4px;border:1px solid var(--linea-fuerte);
+}
+.tono-op.activo .tono-mini{border-color:var(--papel)}
+.tono-op.sinexistencias .tono-mini{filter:grayscale(1);opacity:.5}
+.tono-op small{
+  font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--tinta-suave);
+}
+.tono-op.sinexistencias{
+  color:var(--tinta-suave);border-style:dashed;text-decoration:line-through;
+  text-decoration-thickness:1px;
+}
+.tono-op.sinexistencias small{text-decoration:none}
+.tono-op.sinexistencias.activo{
+  background:none;color:var(--tinta-suave);border-color:var(--linea-fuerte);
+}
+
+.contador{
+  display:flex;align-items:center;gap:0;
+  border:1px solid var(--tinta);width:max-content;margin-top:22px;
+}
+.contador button{
+  width:46px;height:46px;background:none;border:0;cursor:pointer;
+  font:inherit;font-size:20px;color:var(--tinta);
+  display:flex;align-items:center;justify-content:center;
+}
+.contador button:disabled{color:var(--linea-fuerte);cursor:default}
+.contador span{
+  min-width:52px;text-align:center;font-size:17px;font-weight:700;
+  border-left:1px solid var(--tinta);border-right:1px solid var(--tinta);
+  align-self:stretch;display:flex;align-items:center;justify-content:center;
+}
+
+/* --- la nota de venta --- */
+/* Cada línea con puntos suspensivos entre el nombre y el precio, como
+   una factura escrita a mano. */
+.nota{margin:20px 0 0;border-top:1px solid var(--linea)}
+.nota-linea{
+  display:flex;align-items:baseline;gap:8px;
+  padding:14px 0;border-bottom:1px solid var(--linea);
+}
+.nota-nom{font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:-0.01em}
+.nota-cant{font-size:12px;color:var(--tinta-suave);font-weight:700;white-space:nowrap}
+.nota-puntos{
+  flex:1;border-bottom:1.5px dotted var(--linea-fuerte);
+  transform:translateY(-4px);min-width:16px;
+}
+.nota-val{font-size:15px;font-weight:700;white-space:nowrap}
+.nota-quitar{
+  background:none;border:0;cursor:pointer;color:var(--tinta-suave);
+  padding:4px;margin:-4px -4px -4px 2px;
+}
+.nota-total{
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  padding:18px 0 0;
+}
+.nota-total b{font-size:23px;font-weight:800}
+
+.btn-wa{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;margin-top:22px;padding:17px 18px;
+  background:var(--marca);color:var(--papel);
+  border:1px solid var(--marca);cursor:pointer;
+  font:inherit;font-size:15.5px;font-weight:700;
+  letter-spacing:.01em;
+}
+.btn-wa:active{opacity:.85}
+.btn-wa[disabled]{background:var(--linea);border-color:var(--linea-fuerte);color:var(--tinta-suave);cursor:default}
+.btn-fino{
+  display:block;width:100%;margin-top:12px;padding:13px;
+  background:none;border:1px solid var(--linea-fuerte);cursor:pointer;
+  font:inherit;font-size:13.5px;font-weight:700;color:var(--tinta-media);
+}
+.aclaracion{margin:14px 0 0;font-size:12px;color:var(--tinta-suave);line-height:1.5;text-align:center}
+
+/* ================= carga y error ================= */
+
+.estado{
+  min-height:70vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;
+  padding:40px var(--margen);text-align:center;
+}
+.estado h2{
+  font-family:var(--serif);font-size:24px;font-weight:600;margin:0;
+  letter-spacing:-0.02em;max-width:100%;text-wrap:balance;
+}
+.estado p{margin:0;font-size:14px;color:var(--tinta-media);max-width:26em}

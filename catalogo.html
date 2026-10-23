@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f3ef">
+<title>Catálogo</title>
+<meta name="description" content="Catálogo de productos disponibles. Pide por WhatsApp.">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="catalogo.css">
+</head>
+<body>
+
+<!-- Mientras cargan los productos, y por si algo falla. -->
+<div class="estado" id="estado">
+  <h2>Cargando…</h2>
+</div>
+
+<div id="tienda" hidden>
+
+  <header class="cab">
+    <span class="rotulo">Catálogo</span>
+    <!-- El logo lleva los dos nombres dentro. Si la imagen no carga, el
+         título vuelve a escribirse con tipografía. -->
+    <h1 id="cabNombre"><img class="cab-logo" id="cabLogo" src="icons/logos.webp" alt="" width="900" height="418"></h1>
+    <p class="cab-sub" id="cabSub">Elige lo que quieras y te llega el pedido por WhatsApp.</p>
+  </header>
+
+  <!-- Buscador y categorías viajan juntos al hacer scroll. -->
+  <div class="barra-fija">
+    <form class="buscador" id="formBuscar" role="search" autocomplete="off">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+      <input type="search" id="buscar" placeholder="Buscar en el catálogo" enterkeyhint="search" aria-label="Buscar en el catálogo">
+      <button type="button" class="limpiar" id="limpiarBusqueda" aria-label="Borrar búsqueda" hidden>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg>
+      </button>
+    </form>
+    <nav class="filtros" id="filtros" aria-label="Categorías"></nav>
+  </div>
+
+  <main class="rejilla" id="rejilla"></main>
+
+  <footer class="pie">
+    <p class="pie-marca" id="pieNombre"></p>
+    <p id="pieSub">Escríbenos por WhatsApp y coordinamos entrega y pago.</p>
+  </footer>
+
+</div>
+
+<!-- Barra inferior: solo aparece cuando hay algo en el pedido. -->
+<button class="barra-pedido" id="barraPedido" hidden>
+  <span>
+    <span class="rotulo" id="barraCuenta"></span>
+    <b class="cifra" id="barraTotal"></b>
+  </span>
+  <span class="ver">Ver pedido</span>
+</button>
+
+<!-- ============ FICHA DE UN PRODUCTO ============ -->
+<div class="hoja" id="hojaProducto" hidden>
+  <div class="hoja-caja">
+    <div class="hoja-cab">
+      <h2>Producto</h2>
+      <button class="cerrar" data-cerrar="hojaProducto" aria-label="Cerrar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div id="fichaCuerpo"></div>
+  </div>
+</div>
+
+<!-- ============ EL PEDIDO ============ -->
+<div class="hoja" id="hojaPedido" hidden>
+  <div class="hoja-caja">
+    <div class="hoja-cab">
+      <h2>Tu pedido</h2>
+      <button class="cerrar" data-cerrar="hojaPedido" aria-label="Cerrar">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div id="pedidoCuerpo"></div>
+  </div>
+</div>
+
+<script src="vendor/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="catalogo.js"></script>
+</body>
+</html>

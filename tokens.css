@@ -1,0 +1,63 @@
+/* ============================================================
+   Cuentas Claras — tokens comunes
+   Tipografías, paleta y radios que comparten el panel (styles.css)
+   y el catálogo público (catalogo.css). Un solo sitio donde tocarlos,
+   para que el monograma, el color de la barra de Android y el catálogo
+   no se desincronicen nunca.
+   Los hex de TEMAS en app.js tienen que coincidir con --marca de aquí.
+   ============================================================ */
+
+@font-face{
+  font-family:'Fraunces';
+  src:url('fonts/fraunces.woff2') format('woff2-variations'),
+      url('fonts/fraunces.woff2') format('woff2');
+  font-weight:500 700;
+  font-display:swap;
+  font-style:normal;
+}
+@font-face{
+  font-family:'Manrope';
+  src:url('fonts/manrope.woff2') format('woff2-variations'),
+      url('fonts/manrope.woff2') format('woff2');
+  font-weight:400 800;
+  font-display:swap;
+  font-style:normal;
+}
+
+:root{
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;
+  --sans:'Manrope',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+
+  /* Neutros cálidos: papel, no gris de plantilla. */
+  --tinta:#1c1815;
+  --tinta-media:#5c534b;
+  --tinta-suave:#8a7f75;
+  --papel:#f6f3ef;
+  --tarjeta:#ffffff;
+  --linea:#e7e0d6;
+  --linea-fuerte:#d6ccbe;
+
+  --rojo:#a03226;
+  --rojo-suave:#f7e7e4;
+  --ambar:#8a6414;
+  --ambar-suave:#faf1dc;
+
+  /* Tema por defecto; cada tienda lo reemplaza abajo. */
+  --marca:#1e4d45;
+  --marca-claro:#4c8a7c;
+  --marca-suave:#dcebe6;
+  --marca-tenue:#f0f6f4;
+
+  --r-chico:8px;
+  --r:12px;
+  --r-grande:16px;
+}
+
+/* --- identidad por tienda: tonos profundos, no colores de paleta genérica --- */
+body[data-tema="dorado"]{ --marca:#6b4f1d; --marca-claro:#a9863f; --marca-suave:#f0e6d2; --marca-tenue:#faf5ea; }
+body[data-tema="rosa"]  { --marca:#7a2540; --marca-claro:#b85c7e; --marca-suave:#f6e3e9; --marca-tenue:#fcf2f5; }
+body[data-tema="verde"] { --marca:#1e4d45; --marca-claro:#4c8a7c; --marca-suave:#dcebe6; --marca-tenue:#f0f6f4; }
+body[data-tema="morado"]{ --marca:#43305e; --marca-claro:#7c63a3; --marca-suave:#e7dff2; --marca-tenue:#f4f0fa; }
+body[data-tema="azul"]  { --marca:#1e3a5f; --marca-claro:#4e7ca8; --marca-suave:#dde8f2; --marca-tenue:#eff4f9; }
+body[data-tema="coral"] { --marca:#7a2e22; --marca-claro:#b9604a; --marca-suave:#f5dfd9; --marca-tenue:#faefeb; }
+
