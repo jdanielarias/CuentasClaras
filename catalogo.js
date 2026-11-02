@@ -101,17 +101,24 @@
   };
 
   /** La foto del producto, o una lámina con su monograma si no tiene. */
-  function lamina(p, clase = '', indice = 0) {
+  function lamina(p, clase = '', indice = 0, zoom = false) {
     const foto = p.fotos && p.fotos.length ? urlFoto(p.fotos[indice] || p.fotos[0]) : '';
     const dentro = foto
       ? `<img src="${esc(foto)}" alt="${esc(p.nombre)}" loading="lazy">`
       : `<span class="lamina-mono" aria-hidden="true">${esc(inicial(p.nombre))}</span>`;
+    // En la ficha, la foto se toca para verla de cerca.
+    if (zoom && foto) {
+      return `<button class="lamina ${clase} con-zoom" data-zoom="${esc(foto)}" aria-label="Ver la foto de cerca">
+        ${dentro}
+        <span class="lupa" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/><path d="M10.5 8v5M8 10.5h5"/></svg></span>
+      </button>`;
+    }
     return `<div class="lamina ${clase}">${dentro}</div>`;
   }
 
   /** Todas las fotos del producto: la grande y, debajo, las demás en fila. */
   function galeria(p) {
-    if (p.fotos.length <= 1) return lamina(p, 'ficha-lamina');
+    if (p.fotos.length <= 1) return lamina(p, 'ficha-lamina', 0, true);
     const i = Math.min(estado.foto, p.fotos.length - 1);
     const tiras = p.fotos
       .map(
@@ -121,7 +128,7 @@
         </button>`
       )
       .join('');
-    return `${lamina(p, 'ficha-lamina', i)}<div class="tiras">${tiras}</div>`;
+    return `${lamina(p, 'ficha-lamina', i, true)}<div class="tiras">${tiras}</div>`;
   }
 
   const urlFoto = (ruta) =>
@@ -264,21 +271,52 @@
           ? `<span class="pieza-aviso tonos">${disponibles} ${disponibles === 1 ? 'tono' : 'tonos'}</span>`
           : '';
         return `
-          <button class="pieza ${agotado ? 'agotada' : ''}" data-clave="${esc(g.clave)}">
-            <span class="pieza-num cifra">${String(i + 1).padStart(2, '0')}</span>
-            ${lamina(g)}
-            <span class="pieza-nom">${esc(g.nombre)}</span>
-            <span class="pieza-precio cifra">${precioGrupo(g)}</span>
-            ${aviso}
-          </button>`;
+          <div class="pieza ${agotado ? 'agotada' : ''}" data-clave="${esc(g.clave)}">
+            <button class="pieza-abrir">
+              <span class="pieza-num cifra">${String(i + 1).padStart(2, '0')}</span>
+              ${lamina(g)}
+              <span class="pieza-nom">${esc(g.nombre)}</span>
+              <span class="pieza-precio cifra">${precioGrupo(g)}</span>
+              ${aviso}
+            </button>
+            ${accionRapida(g)}
+          </div>`;
       })
       .join('');
+  }
+
+  /* Lo que no tiene tonos para elegir se puede añadir desde la rejilla,
+     sin abrir la ficha. Lo que tiene varios tonos sí hay que abrirlo. */
+  function accionRapida(g) {
+    if (g.variantes.length !== 1 || g.unidades <= 0) return '';
+    const p = g.variantes[0];
+    const cant = enPedido(p.id);
+    if (!cant) {
+      return `<div class="pieza-accion">
+        <button class="pieza-anadir" data-rapido="1" data-id="${esc(p.id)}">Añadir</button>
+      </div>`;
+    }
+    return `<div class="pieza-accion">
+      <div class="pieza-contador">
+        <button data-rapido="-1" data-id="${esc(p.id)}" aria-label="Quitar una">−</button>
+        <span class="cifra">${cant}</span>
+        <button data-rapido="1" data-id="${esc(p.id)}" ${cant >= p.unidades ? 'disabled' : ''} aria-label="Añadir una">+</button>
+      </div>
+    </div>`;
+  }
+
+  /** Cada vez que cambia el pedido: se guarda y se redibuja lo que lo muestra. */
+  function pedidoCambio() {
+    guardarPedido();
+    renderBarra();
+    renderRejilla();
   }
 
   function renderBarra() {
     const piezas = piezasPedido();
     const barra = $('#barraPedido');
     barra.hidden = piezas === 0;
+    document.body.classList.toggle('con-pedido', piezas > 0);
     if (piezas === 0) return;
     $('#barraCuenta').textContent = piezas === 1 ? '1 artículo' : `${piezas} artículos`;
     $('#barraTotal').textContent = money(totalPedido());
@@ -458,9 +496,26 @@
       return;
     }
 
-    const pieza = e.target.closest('.pieza');
+    const rapido = e.target.closest('[data-rapido]');
+    if (rapido) {
+      const p = estado.productos.find((x) => x.id === rapido.dataset.id);
+      if (!p) return;
+      const nueva = Math.min(Math.max(0, enPedido(p.id) + Number(rapido.dataset.rapido)), p.unidades);
+      if (nueva > 0) estado.pedido[p.id] = nueva;
+      else delete estado.pedido[p.id];
+      pedidoCambio();
+      return;
+    }
+
+    const pieza = e.target.closest('.pieza-abrir');
     if (pieza) {
-      abrirFicha(pieza.dataset.clave);
+      abrirFicha(pieza.closest('.pieza').dataset.clave);
+      return;
+    }
+
+    const zoom = e.target.closest('[data-zoom]');
+    if (zoom) {
+      abrirVisor(zoom.dataset.zoom);
       return;
     }
 
@@ -486,9 +541,8 @@
       const nueva = Math.min(Math.max(0, enPedido(p.id) + Number(paso.dataset.paso)), p.unidades);
       if (nueva > 0) estado.pedido[p.id] = nueva;
       else delete estado.pedido[p.id];
-      guardarPedido();
+      pedidoCambio();
       renderFicha();
-      renderBarra();
       return;
     }
 
@@ -496,8 +550,7 @@
       const p = estado.productos.find((x) => x.id === estado.variante);
       if (p && enPedido(p.id) === 0) {
         estado.pedido[p.id] = 1;
-        guardarPedido();
-        renderBarra();
+        pedidoCambio();
       }
       cerrarHojas();
       return;
@@ -511,8 +564,7 @@
     const quitar = e.target.closest('[data-quitar]');
     if (quitar) {
       delete estado.pedido[quitar.dataset.quitar];
-      guardarPedido();
-      renderBarra();
+      pedidoCambio();
       renderPedido();
       return;
     }
@@ -528,8 +580,7 @@
       window.open(`https://wa.me/${n}?text=${encodeURIComponent(textoPedido())}`, '_blank', 'noopener');
       // Ya salió por WhatsApp: el carrito queda vacío para el próximo pedido.
       estado.pedido = {};
-      guardarPedido();
-      renderBarra();
+      pedidoCambio();
       cerrarHojas();
       return;
     }
@@ -556,8 +607,132 @@
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') cerrarHojas();
+    if (e.key !== 'Escape') return;
+    if (!$('#visor').hidden) cerrarVisor();
+    else cerrarHojas();
   });
+
+  /* ---------------- ver una foto de cerca ----------------
+     Pellizcar con dos dedos acerca y aleja; con la foto acercada, un
+     dedo la mueve. Tocar dos veces (o doble clic) alterna entre la foto
+     entera y acercada. En computador también sirve la rueda del ratón. */
+
+  const visor = $('#visor');
+  const visorImg = $('#visorImg');
+  const zoomEstado = { escala: 1, x: 0, y: 0 };
+  const dedos = new Map();
+  let pellizco = null; // distancia y punto medio al empezar a pellizcar
+  let ultimoToque = 0;
+  let movido = false;
+  const MAX_ZOOM = 5;
+
+  function aplicarZoom() {
+    const { escala } = zoomEstado;
+    // No se deja arrastrar la foto más allá de sus bordes.
+    const limX = ((escala - 1) * visorImg.clientWidth) / 2;
+    const limY = ((escala - 1) * visorImg.clientHeight) / 2;
+    zoomEstado.x = Math.min(limX, Math.max(-limX, zoomEstado.x));
+    zoomEstado.y = Math.min(limY, Math.max(-limY, zoomEstado.y));
+    visorImg.style.transform = `translate(${zoomEstado.x}px, ${zoomEstado.y}px) scale(${escala})`;
+    visor.classList.toggle('acercado', escala > 1);
+  }
+
+  /** Cambia la escala dejando quieto el punto (px, py) de la pantalla. */
+  function zoomEn(nueva, px, py) {
+    const r = visor.getBoundingClientRect();
+    const cx = px - (r.left + r.width / 2);
+    const cy = py - (r.top + r.height / 2);
+    nueva = Math.min(MAX_ZOOM, Math.max(1, nueva));
+    const f = nueva / zoomEstado.escala;
+    zoomEstado.x = cx - (cx - zoomEstado.x) * f;
+    zoomEstado.y = cy - (cy - zoomEstado.y) * f;
+    zoomEstado.escala = nueva;
+    aplicarZoom();
+  }
+
+  function abrirVisor(url) {
+    zoomEstado.escala = 1;
+    zoomEstado.x = 0;
+    zoomEstado.y = 0;
+    visorImg.style.transform = '';
+    visor.classList.remove('acercado');
+    visorImg.src = url;
+    visor.hidden = false;
+  }
+
+  function cerrarVisor() {
+    visor.hidden = true;
+    visorImg.removeAttribute('src');
+    dedos.clear();
+    pellizco = null;
+  }
+
+  $('#visorCerrar').addEventListener('click', cerrarVisor);
+
+  const puntoMedio = () => {
+    const [a, b] = [...dedos.values()];
+    return {
+      d: Math.hypot(a.x - b.x, a.y - b.y),
+      x: (a.x + b.x) / 2,
+      y: (a.y + b.y) / 2
+    };
+  };
+
+  visor.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('#visorCerrar')) return;
+    try {
+      visor.setPointerCapture(e.pointerId);
+    } catch (err) {
+      /* sin captura también funciona, solo que menos fino */
+    }
+    dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    movido = false;
+    if (dedos.size === 2) pellizco = { ...puntoMedio(), escala: zoomEstado.escala };
+  });
+
+  visor.addEventListener('pointermove', (e) => {
+    const antes = dedos.get(e.pointerId);
+    if (!antes) return;
+    const ahora = { x: e.clientX, y: e.clientY };
+    dedos.set(e.pointerId, ahora);
+    if (Math.hypot(ahora.x - antes.x, ahora.y - antes.y) > 2) movido = true;
+
+    if (dedos.size === 2 && pellizco) {
+      const m = puntoMedio();
+      zoomEn((pellizco.escala * m.d) / pellizco.d, m.x, m.y);
+    } else if (dedos.size === 1 && zoomEstado.escala > 1) {
+      zoomEstado.x += ahora.x - antes.x;
+      zoomEstado.y += ahora.y - antes.y;
+      aplicarZoom();
+    }
+  });
+
+  function soltar(e) {
+    if (!dedos.has(e.pointerId)) return;
+    dedos.delete(e.pointerId);
+    if (dedos.size < 2) pellizco = null;
+    if (e.type !== 'pointerup' || dedos.size || movido) return;
+    // Dos toques seguidos: acercar donde se tocó, o volver a la foto entera.
+    const ahora = Date.now();
+    if (ahora - ultimoToque < 320) {
+      if (zoomEstado.escala > 1) zoomEn(1, e.clientX, e.clientY);
+      else zoomEn(2.5, e.clientX, e.clientY);
+      ultimoToque = 0;
+    } else {
+      ultimoToque = ahora;
+    }
+  }
+  visor.addEventListener('pointerup', soltar);
+  visor.addEventListener('pointercancel', soltar);
+
+  visor.addEventListener(
+    'wheel',
+    (e) => {
+      e.preventDefault();
+      zoomEn(zoomEstado.escala * (e.deltaY < 0 ? 1.15 : 1 / 1.15), e.clientX, e.clientY);
+    },
+    { passive: false }
+  );
 
   /* ---------------- arranque ---------------- */
 
@@ -621,6 +796,14 @@
       });
     } else {
       $('#cabNombre').textContent = estado.catalogo.nombre;
+    }
+
+    // El botón flotante solo abre el chat, sin nada del pedido.
+    const n = numeroWhatsApp();
+    if (n) {
+      const contacto = $('#waContacto');
+      contacto.href = `https://wa.me/${n}?text=${encodeURIComponent('Hola, me interesa un producto')}`;
+      contacto.hidden = false;
     }
 
     if (!estado.productos.length) {

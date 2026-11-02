@@ -133,10 +133,35 @@ svg{display:block;flex:0 0 auto}
   border-bottom:1px solid var(--linea);
   border-right:1px solid var(--linea);
   padding:16px var(--margen) 20px;
-  background:none;border-top:0;border-left:0;
+  display:flex;flex-direction:column;
+}
+.pieza-abrir{
+  background:none;border:0;padding:0;width:100%;
   font:inherit;color:inherit;text-align:left;cursor:pointer;
   display:flex;flex-direction:column;
   -webkit-appearance:none;appearance:none;
+}
+
+/* Añadir sin abrir la ficha: va al pie de la tarjeta, alineado en la fila. */
+.pieza-accion{margin-top:auto;padding-top:12px}
+.pieza-anadir{
+  width:100%;padding:10px 8px;cursor:pointer;
+  background:none;border:1px solid var(--marca);color:var(--marca);
+  font:inherit;font-size:13px;font-weight:700;letter-spacing:.02em;
+}
+.pieza-anadir:active{background:var(--marca);color:var(--papel)}
+.pieza-contador{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;
+  border:1px solid var(--marca);background:var(--marca);color:var(--papel);
+}
+.pieza-contador button{
+  height:38px;background:none;border:0;cursor:pointer;
+  font:inherit;font-size:18px;color:inherit;
+}
+.pieza-contador button:disabled{opacity:.35;cursor:default}
+.pieza-contador span{
+  min-width:34px;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;
 }
 .rejilla .pieza:nth-child(2n){border-right:0}
 @media (min-width:760px){
@@ -256,6 +281,12 @@ svg{display:block;flex:0 0 auto}
 
 /* --- ficha del producto --- */
 .ficha-lamina{aspect-ratio:4/5;max-height:46vh;margin:20px auto 0;max-width:320px}
+.con-zoom{padding:0;font:inherit;cursor:zoom-in;-webkit-appearance:none;appearance:none}
+.lupa{
+  position:absolute;right:8px;bottom:8px;
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  background:rgba(246,243,239,.9);color:var(--tinta);border:1px solid var(--linea);
+}
 
 /* Las demás fotos, en fila bajo la grande. Cuadradas y con filete, como
    las contactos de una hoja de pruebas. */
@@ -382,3 +413,45 @@ svg{display:block;flex:0 0 auto}
   letter-spacing:-0.02em;max-width:100%;text-wrap:balance;
 }
 .estado p{margin:0;font-size:14px;color:var(--tinta-media);max-width:26em}
+
+/* ================= foto de cerca ================= */
+
+.visor{
+  position:fixed;inset:0;z-index:60;
+  background:rgba(20,17,15,.94);
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;touch-action:none;cursor:zoom-in;
+  user-select:none;-webkit-user-select:none;
+}
+.visor.acercado{cursor:grab}
+.visor img{
+  max-width:100%;max-height:100%;object-fit:contain;
+  transform-origin:center center;will-change:transform;
+  pointer-events:none;
+}
+.visor-cerrar{
+  position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  background:rgba(246,243,239,.14);color:#f6f3ef;border:0;cursor:pointer;
+}
+.visor-ayuda{
+  position:absolute;left:0;right:0;bottom:calc(18px + env(safe-area-inset-bottom));
+  margin:0;text-align:center;font-size:12px;color:rgba(246,243,239,.7);
+  pointer-events:none;
+}
+.visor.acercado .visor-ayuda{display:none}
+
+/* ================= WhatsApp para escribir ================= */
+
+/* Verde de WhatsApp: el cliente lo reconoce sin tener que leer nada. */
+.wa-flotante{
+  position:fixed;right:16px;z-index:45;
+  bottom:calc(18px + env(safe-area-inset-bottom));
+  width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:#25d366;color:#fff;
+  box-shadow:0 4px 14px rgba(28,24,21,.28);
+}
+.wa-flotante:active{transform:scale(.95)}
+/* Con la barra del pedido abajo, el botón sube para no taparla. */
+.con-pedido .wa-flotante{bottom:calc(88px + env(safe-area-inset-bottom))}
