@@ -225,6 +225,10 @@
     const lista = estado.grupos.filter(
       (g) => (!estado.categoria || g.categoria === estado.categoria) && coincide(g, palabras)
     );
+    // En «Todo» se muestran en orden alfabético.
+    if (!estado.categoria) {
+      lista.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+    }
 
     if (!lista.length) {
       if (!palabras.length) {
@@ -522,6 +526,11 @@
       const n = numeroWhatsApp();
       if (!n) return;
       window.open(`https://wa.me/${n}?text=${encodeURIComponent(textoPedido())}`, '_blank', 'noopener');
+      // Ya salió por WhatsApp: el carrito queda vacío para el próximo pedido.
+      estado.pedido = {};
+      guardarPedido();
+      renderBarra();
+      cerrarHojas();
       return;
     }
   });
