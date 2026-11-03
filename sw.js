@@ -6,7 +6,7 @@
  * se puede consultar sin señal es la copia que la propia app guarda al
  * cargar, y que se borra al cerrar sesión.
  */
-const CACHE = 'cuentas-claras-v8';
+const CACHE = 'cuentas-claras-v9';
 
 const ARCHIVOS = [
   './',

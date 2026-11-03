@@ -223,6 +223,32 @@ svg{display:block;flex:0 0 auto}
 .vacio .vacio-sub{margin-top:10px;font-size:13.5px;line-height:1.5}
 .vacio .btn-fino{max-width:280px;margin:18px auto 0}
 
+/* ================= pantallas anchas =================
+   En un computador grande la página no se estira de borde a borde: el
+   contenido se queda en una columna centrada de 1240px, como la plana
+   de un catálogo impreso. Las tarjetas no crecen sin control y la
+   vista no tiene que ir de un extremo al otro de la pantalla. */
+
+@media (min-width:760px){
+  /* La portada va centrada, para que el logo no quede solo a un lado. */
+  .cab{text-align:center}
+  .cab-logo{margin:6px auto 0}
+  .cab-sub{margin-left:auto;margin-right:auto}
+  /* Las categorías también, sin dejar de poder deslizarse si no caben. */
+  .filtros button:first-child{margin-left:auto}
+  .filtros button:last-child{margin-right:auto}
+}
+
+@media (min-width:1320px){
+  /* El margen crece lo que haga falta para que el contenido mida 1240px. */
+  :root{--margen:max(40px, calc((100% - 1240px) / 2))}
+  .rejilla{
+    max-width:1240px;margin-left:auto;margin-right:auto;
+    border-left:1px solid var(--linea);border-right:1px solid var(--linea);
+  }
+  .pie{text-align:center}
+}
+
 /* ================= pie ================= */
 
 .pie{

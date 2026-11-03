@@ -232,10 +232,8 @@
     const lista = estado.grupos.filter(
       (g) => (!estado.categoria || g.categoria === estado.categoria) && coincide(g, palabras)
     );
-    // En «Todo» se muestran en orden alfabético.
-    if (!estado.categoria) {
-      lista.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
-    }
+    // Siempre en orden alfabético, en «Todo» y en cada categoría.
+    lista.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
 
     if (!lista.length) {
       if (!palabras.length) {
